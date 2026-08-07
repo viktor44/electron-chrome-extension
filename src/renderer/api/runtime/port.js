@@ -1,6 +1,7 @@
 const { ipcRenderer } = require('electron');
 
 const constants = require('../../../common/constants');
+const { sendToWebContents } = require('../../../common/send-to-webcontents');
 const { log } = require('../../../common/utils');
 const Event = require('../event');
 const MessageSender = require('./message-sender');
@@ -30,13 +31,13 @@ class Port {
   disconnect() {
     if (this.disconnected) return;
 
-    ipcRenderer.sendToAll(this.tabId, `${constants.PORT_DISCONNECT_}${this.portId}`);
+    sendToWebContents(this.tabId, `${constants.PORT_DISCONNECT_}${this.portId}`);
     this._onDisconnect();
   }
 
   postMessage(message) {
     // log(`postMessage for port #${this.portId} ${this.name}: `, message);
-    ipcRenderer.sendToAll(this.tabId, `${constants.PORT_POSTMESSAGE_}${this.portId}`, JSON.stringify(message));
+    sendToWebContents(this.tabId, `${constants.PORT_POSTMESSAGE_}${this.portId}`, JSON.stringify(message));
   }
 
   _onDisconnect() {

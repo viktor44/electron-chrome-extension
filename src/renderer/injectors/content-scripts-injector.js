@@ -1,5 +1,6 @@
 const { ipcRenderer, webFrame } = require('electron');
 const constants = require('../../common/constants');
+const { sendToWebContents } = require('../../common/send-to-webcontents');
 
 process.setMaxListeners(100);
 
@@ -62,7 +63,7 @@ const addContentScript = function (extensionId, script) {
 ipcRenderer.on(constants.TABS_EXECUTESCRIPT, function (event, senderWebContentsId, requestId, extensionId, url, code) {
   const worldId = require('../isolated-worlds').getIsolatedWorldId(extensionId)
   const result = injectContentScript(worldId, [{ url, code }])
-  ipcRenderer.sendToAll(senderWebContentsId, `${constants.TABS_EXECUTESCRIPT_RESULT_}${requestId}`, result)
+  sendToWebContents(senderWebContentsId, `${constants.TABS_EXECUTESCRIPT_RESULT_}${requestId}`, result)
 })
 
 // Read the renderer process preferences.

@@ -7,6 +7,10 @@ const path = require('path')
 const url = require('url')
 
 const constants = require('../common/constants');
+const { startSendToWebContentsRelay } = require('../common/send-to-webcontents');
+
+// relays renderer to renderer messages, `ipcRenderer.sendToAll` is gone since Electron 28
+startSendToWebContentsRelay();
 
 const wcAsTab = wc => ({
   id: wc.id,

@@ -23,13 +23,10 @@ ipcRendererInternal.sendSync = function (channel: any, ...args: any[]) {
   return ipc.sendSync(internal, channel, args)[0];
 };
 
-ipcRendererInternal.sendTo = function (webContentsId: any, channel: any, ...args: any[]) {
-  return ipc.sendTo(internal, false, webContentsId, channel, args);
-};
-
-ipcRendererInternal.sendToAll = function (webContentsId: any, channel: any, ...args: any[]) {
-  return ipc.sendTo(internal, true, webContentsId, channel, args);
-};
+// `sendTo` and `sendToAll` are gone: the `sendTo` method of the `electron_renderer_ipc`
+// binding has been removed in Electron 28, along with `ipcRenderer.sendTo`.
+// Nothing here used them, see `common/send-to-webcontents.ts` for the replacement.
+// @see https://www.electronjs.org/docs/latest/breaking-changes#removed-ipcrenderersendto
 
 ipcRendererInternal.invoke = async function (channel: string, ...args: any[]) {
   const { error, result } = await ipc.invoke(internal, channel, args);

@@ -6,21 +6,21 @@ import parse from 'content-security-policy-parser';
 import { Protocol } from '../../common';
 
 /**
- * Convert object of policies into content security policy heder value
+ * Convert map of policies into content security policy heder value
  *
  * @example
- * {
- * 'default-src': ["'self'"],
- * 'script-src': ["'unsafe-eval'", 'scripts.com'],
- * 'object-src': [],
- * 'style-src': ['styles.biz']
+ * Map {
+ * 'default-src' => ["'self'"],
+ * 'script-src' => ["'unsafe-eval'", 'scripts.com'],
+ * 'object-src' => [],
+ * 'style-src' => ['styles.biz']
  * } => "default-src 'self'; script-src 'unsafe-eval' scripts.com; object-src; style-src styles.biz"
  *
- * @param { [name: string]: string[] } policies policies as object
+ * @param { Map<string, string[]> } policies policies as returned by `parse`
  * @return {string} the stringified policies
  */
-const stringify = (policies: { [name: string]: string[] }): string =>
-  Object.entries(policies)
+const stringify = (policies: Map<string, string[]>): string =>
+  Array.from(policies.entries())
     .map(
       ([name, value]: [string, string[]]) =>
         `${name} ${value.join(' ')}`
@@ -171,14 +171,13 @@ app.on(
         const cspDirective: string = (getHeader(cspHeaderKey, responseHeaders) || [])[0];
 
         if (cspDirective) {
-          const policies = parse(cspDirective);
-          const frameSrcPolicy = policies[cspPolicyKey];
+          // since `content-security-policy-parser@0.6`, `parse` returns a `Map`
+          const policies: Map<string, string[]> = parse(cspDirective);
+          const frameSrcPolicy = policies.get(cspPolicyKey);
 
           if (frameSrcPolicy) {
-            const policiesWithOverride = {
-              ...policies,
-              [cspPolicyKey]: [...frameSrcPolicy, Protocol.Extension],
-            };
+            const policiesWithOverride = new Map(policies);
+            policiesWithOverride.set(cspPolicyKey, [...frameSrcPolicy, Protocol.Extension]);
 
             responseHeaders = setHeader(cspHeaderKey, [stringify(policiesWithOverride)], responseHeaders);
           }
